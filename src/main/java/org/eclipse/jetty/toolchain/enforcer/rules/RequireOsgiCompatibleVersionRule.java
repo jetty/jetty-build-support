@@ -18,52 +18,42 @@
 
 package org.eclipse.jetty.toolchain.enforcer.rules;
 
-import org.apache.maven.enforcer.rule.api.EnforcerRule;
+import javax.inject.Inject;
+import javax.inject.Named;
+
 import org.apache.maven.enforcer.rule.api.EnforcerRuleException;
-import org.apache.maven.enforcer.rule.api.EnforcerRuleHelper;
-import org.codehaus.plexus.component.configurator.expression.ExpressionEvaluationException;
+import org.apache.maven.project.MavenProject;
 import org.codehaus.plexus.util.StringUtils;
 
-public class RequireOsgiCompatibleVersionRule implements EnforcerRule
+@Named("requireCompatibleVersionOSGI")
+public class RequireOsgiCompatibleVersionRule extends AbstractCompatibleVersionRule
 {
-    public void execute(EnforcerRuleHelper helper) throws EnforcerRuleException
+    @Inject
+    public RequireOsgiCompatibleVersionRule(MavenProject project)
     {
-        try
-        {
-            String packaging = (String)helper.evaluate("${project.packaging}");
-            if ("pom".equals(packaging))
-            {
-                // Skip pom packaging (not a deployed artifact)
-                return;
-            }
-            String version = (String)helper.evaluate("${project.version}");
-            ensureValidOsgiVersion(version);
-        }
-        catch (ExpressionEvaluationException e)
-        {
-            throw new EnforcerRuleException("Unable to lookup an expression " + e.getLocalizedMessage(),e);
-        }
+        super(project);
     }
 
-    public void ensureValidOsgiVersion(String version) throws EnforcerRuleException
+    @Override
+    protected void ensureCompatibleVersion(String version) throws EnforcerRuleException
     {
         if (version.endsWith("SNAPSHOT"))
         {
             // Skip check on SNAPSHOT versions.
             return;
         }
-        
+
         String parts[] = version.split("\\.");
         if (parts.length > 4)
         {
             throw new EnforcerRuleException("The version \"" + version + "\" does not conform to the OSGi version requirements.  "
-                    + "It can't have more than 4 parts (#.#.#.*)" + " - The '.' character has a special meaning");
+                + "It can't have more than 4 parts (#.#.#.*)" + " - The '.' character has a special meaning");
         }
 
         if (parts.length < 3)
         {
             throw new EnforcerRuleException("The version \"" + version + "\" does not conform to the OSGi version requirements.  "
-                    + "It must have 3 (or 4) parts (#.#.#.*)");
+                + "It must have 3 (or 4) parts (#.#.#.*)");
         }
 
         for (int i = 0; i < 3; i++)
@@ -71,12 +61,12 @@ public class RequireOsgiCompatibleVersionRule implements EnforcerRule
             if (!StringUtils.isNumeric(parts[i]))
             {
                 throw new EnforcerRuleException("The version \"" + version + "\" does not conform to the OSGi version requirements.  " + "Part #" + (i + 1)
-                        + " \"" + parts[i] + "\" of an OSGi version must be a non-negative number (#.#.#.*).");
+                    + " \"" + parts[i] + "\" of an OSGi version must be a non-negative number (#.#.#.*).");
             }
             if (Integer.parseInt(parts[i]) < 0)
             {
                 throw new EnforcerRuleException("The version \"" + version + "\" does not conform to the OSGi version requirements.  " + "Part #" + (i + 1)
-                        + " \"" + parts[i] + "\" of an OSGi version must be a non-negative number (#.#.#.*).");
+                    + " \"" + parts[i] + "\" of an OSGi version must be a non-negative number (#.#.#.*).");
             }
         }
 
@@ -101,24 +91,14 @@ public class RequireOsgiCompatibleVersionRule implements EnforcerRule
                     continue; // underscore and dash are also acceptable
                 }
                 // All other characters are invalid for the qualifier
-                throw new EnforcerRuleException("The OSGi qualifier of \"" + version + "\" does not conform to the OSGi version requirements.  " + 
-                        "Only Letters (upper and lower), numbers, dash '-', and underscore '_' are allowed.");
+                throw new EnforcerRuleException("The OSGi qualifier of \"" + version + "\" does not conform to the OSGi version requirements.  " +
+                    "Only Letters (upper and lower), numbers, dash '-', and underscore '_' are allowed.");
             }
         }
     }
 
     public String getCacheId()
     {
-        return "osgi-version";
-    }
-
-    public boolean isCacheable()
-    {
-        return false;
-    }
-
-    public boolean isResultValid(EnforcerRule rule)
-    {
-        return true;
+        return "version-compatible-osgi";
     }
 }

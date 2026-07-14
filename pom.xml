@@ -4,8 +4,9 @@
   <parent>
     <groupId>org.eclipse.jetty</groupId>
     <artifactId>jetty-parent</artifactId>
-    <version>27</version>
+    <version>32</version>
   </parent>
+  <groupId>org.eclipse.jetty.toolchain</groupId>
   <artifactId>jetty-build-support</artifactId>
   <version>1.6-SNAPSHOT</version>
   <packaging>jar</packaging>
@@ -14,24 +15,42 @@
   <scm>
     <connection>scm:git:https://github.com/jetty/${jetty.git.repo}.git</connection>
     <developerConnection>scm:git:git@github.com:jetty/${jetty.git.repo}.git</developerConnection>
-    <tag>HEAD</tag>
     <url>https://github.com/jetty/${jetty.git.repo}</url>
   </scm>
   <properties>
-    <jdk.version.minimum>8</jdk.version.minimum>
+    <jdk.version.minimum>17</jdk.version.minimum>
     <jetty.git.repo>jetty-build-support</jetty.git.repo>
     <license.header.resource>license-header.txt</license.header.resource>
+    <maven.version>3.9.15</maven.version>
   </properties>
   <dependencies>
     <dependency>
       <groupId>org.apache.maven</groupId>
       <artifactId>maven-plugin-api</artifactId>
-      <version>3.9.8</version>
+      <version>${maven.version}</version>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.enforcer</groupId>
       <artifactId>enforcer-api</artifactId>
-      <version>3.5.0</version>
+      <version>3.6.3</version>
+    </dependency>
+    <dependency>
+      <groupId>javax.inject</groupId>
+      <artifactId>javax.inject</artifactId>
+      <version>1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.commons</groupId>
+      <artifactId>commons-lang3</artifactId>
+      <version>3.20.0</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
+      <groupId>org.apache.maven</groupId>
+      <artifactId>maven-core</artifactId>
+      <version>${maven.version}</version>
+      <scope>provided</scope>
     </dependency>
     <dependency>
       <groupId>org.apache.maven.plugins</groupId>
@@ -46,10 +65,33 @@
       <scope>provided</scope>
     </dependency>
     <dependency>
+      <groupId>org.codehaus.plexus</groupId>
+      <artifactId>plexus-utils</artifactId>
+      <version>3.6.1</version>
+      <scope>provided</scope>
+    </dependency>
+    <dependency>
       <groupId>org.junit.jupiter</groupId>
       <artifactId>junit-jupiter</artifactId>
       <version>5.10.3</version>
       <scope>test</scope>
     </dependency>
   </dependencies>
+  <build>
+    <plugins>
+      <plugin>
+        <!-- generate index of project components -->
+        <groupId>org.eclipse.sisu</groupId>
+        <artifactId>sisu-maven-plugin</artifactId>
+        <version>1.0.0</version>
+        <executions>
+          <execution>
+            <goals>
+              <goal>main-index</goal>
+            </goals>
+          </execution>
+        </executions>
+      </plugin>
+    </plugins>
+  </build>
 </project>
